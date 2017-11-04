@@ -10,7 +10,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -30,23 +32,42 @@ public enum DriversEnum {
     FF {
         @Override
         public RemoteWebDriver getDriver() {
-            System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver");
+            String os = System.getenv().get("OS");
+            Logger.logDebug("OS is: " + os);
 
-            DesiredCapabilities capabilities = DesiredCapabilities.firefox();
-            FirefoxProfile firefoxProfile = new FirefoxProfile();
-            firefoxProfile.setPreference("browser.cache.disk.enable", false);
-            firefoxProfile.setPreference("browser.cache.memory.enable", false);
-            firefoxProfile.setPreference("browser.cache.offline.enable", false);
-            firefoxProfile.setPreference("network.http.use-cache", false);
-            firefoxProfile.setPreference("browser.download.folderList", 2);
-            firefoxProfile.setPreference("intl.accept_languages", "en-US");
-            firefoxProfile.setPreference("browser.download.manager.showWhenStarting", false);
-//            firefoxProfile.setPreference("browser.download.dir", "D:\\");
+            //if you're going to use more than one OS, you should make this switchable based on OS.
+            Path path = FileSystems.getDefault().getPath("3rdParty/geckodriver/geckodriver");
+            System.setProperty("webdriver.gecko.driver",path.toString());
+
+            if (os.contains("Mac")) {
+                System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver");
+            } else if (os.contains("Windows")) {
+                Logger.logDebug("Set geckodriver path");
+                System.setProperty("webdriver.gecko.driver", "C:\\geckodriver\\geckodriver.exe");
+
+//                capabilities.setCapability("firefox_binary","C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe");
+//                capabilities.setCapability("gecko", true);
+//                capabilities.setCapability("marionette", true);
+            }
+
+//            FirefoxProfile firefoxProfile = new FirefoxProfile();
+//            firefoxProfile.setPreference("browser.cache.disk.enable", false);
+//            firefoxProfile.setPreference("browser.cache.memory.enable", false);
+//            firefoxProfile.setPreference("browser.cache.offline.enable", false);
+//            firefoxProfile.setPreference("network.http.use-cache", false);
+//            firefoxProfile.setPreference("browser.download.folderList", 2);
+//            firefoxProfile.setPreference("intl.accept_languages", "en-US");
+//            firefoxProfile.setPreference("browser.download.manager.showWhenStarting", false);
+////            firefoxProfile.setPreference("browser.download.dir", "D:\\");
 //            firefoxProfile.setPreference("browser.helperApps.neverAsk.saveToDisk",
 //                    "text/csv, application/pdf");
-
-            capabilities.setCapability(FirefoxDriver.PROFILE, firefoxProfile);
-            return new FirefoxDriver(capabilities);
+//
+//            DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+////            capabilities.setCapability(FirefoxDriver.PROFILE, firefoxProfile);
+            FirefoxOptions options = new FirefoxOptions()
+                    .addPreference("browser.startup.page", 1)
+                    .addPreference("browser.startup.homepage", Config.getProperty(Config.TEST_HOST));
+            return new FirefoxDriver(options);
         }
     },
 
@@ -165,6 +186,7 @@ public enum DriversEnum {
         }
 
     },
+
     QT {
         @Override
         public RemoteWebDriver getDriver() {

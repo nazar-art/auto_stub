@@ -19,7 +19,6 @@ import org.testng.annotations.Listeners;
 
 import javax.annotation.PostConstruct;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static net.lelyak.edu.core.driver.Driver.driver;
 
